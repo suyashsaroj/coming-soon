@@ -1,236 +1,334 @@
 <!DOCTYPE html>
-
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rare Origins</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AAIGIRI</title>
 
-<style>
+    <!-- Favicon: Tea leaf icon -->
+    <link rel="icon" type="image/png" href="favicon.png">
 
-body{
-margin:0;
-background:#070707;
-font-family: "Georgia", serif;
-color:white;
-overflow:hidden;
-}
+    <!-- Typography: Marcellus for headings (Zen, ancient elegance), Outfit for body (modern clean luxury) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Outfit:wght@200;300&display=swap"
+        rel="stylesheet">
 
-/* main content */
+    <style>
+        :root {
+            --primary-gold: linear-gradient(90deg, #a67c52 0%, #d4af37 50%, #a67c52 100%);
+            --leaf-dark: #1a2a10;
+            --background: #050505;
+        }
 
-.container{
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-text-align:center;
-z-index:10;
-max-width:700px;
-}
+        body {
+            margin: 0;
+            background: var(--background);
+            font-family: 'Outfit', sans-serif;
+            color: #f0f0f0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-rendering: optimizeLegibility;
+        }
 
-h1{
-font-size:90px;
-font-weight:500;
-letter-spacing:1px;
-margin:0;
-}
+        /* Subtle background vignette for atmospheric depth */
+        body::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, transparent 20%, rgba(0, 0, 0, 0.8) 100%);
+            pointer-events: none;
+            z-index: 5;
+        }
 
-.gold{
-width:70px;
-height:2px;
-background:#c6a357;
-margin:22px auto;
-}
+        /* Main content container */
+        .container {
+            position: relative;
+            text-align: center;
+            z-index: 10;
+            max-width: 850px;
+            padding: 40px;
+            /* Subtle lift effect on hover */
+            transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
-.subtitle{
-font-size:20px;
-line-height:1.7;
-opacity:.85;
-}
+        .container:hover {
+            transform: scale(1.01);
+        }
 
-/* canvas */
+        h1 {
+            font-family: 'Marcellus', serif;
+            font-size: clamp(60px, 10vw, 120px);
+            font-weight: 400;
+            letter-spacing: 12px;
+            margin: 0;
+            text-transform: uppercase;
+            /* Premium gradient text */
+            background: linear-gradient(180deg, #ffffff 0%, #c0c0c0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 15px 50px rgba(0, 0, 0, 0.8);
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1));
+        }
 
-canvas{
-position:absolute;
-top:0;
-left:0;
-}
+        /* Elegant gold divider decoration */
+        .gold {
+            width: 200px;
+            height: 1px;
+            background: var(--primary-gold);
+            margin: 40px auto;
+            position: relative;
+            overflow: visible;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+        }
 
-/* subtle lighting */
+        .gold::before,
+        .gold::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 4px;
+            height: 4px;
+            background: #d4af37;
+            transform: translateY(-50%) rotate(45deg);
+        }
 
-.light{
-position:absolute;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:radial-gradient(circle at center,
-rgba(255,220,150,0.06),
-transparent 60%);
-pointer-events:none;
-}
+        .gold::before {
+            left: -15px;
+        }
 
-</style>
+        .gold::after {
+            right: -15px;
+        }
 
+        .subtitle {
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px;
+            font-weight: 200;
+            line-height: 2.2;
+            letter-spacing: 4px;
+            color: rgba(255, 255, 255, 0.5);
+            max-width: 700px;
+            margin: 0 auto;
+            text-transform: uppercase;
+        }
+
+        /* Canvas positions */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Atmospheric warm lighting overlay */
+        .light {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%,
+                    rgba(212, 175, 55, 0.03) 0%,
+                    transparent 75%);
+            pointer-events: none;
+            z-index: 2;
+        }
+    </style>
 </head>
 
 <body>
 
-<canvas id="canvas"></canvas>
+    <canvas id="canvas"></canvas>
 
-<div class="container">
+    <div class="container">
+        <h1>AAIGIRI</h1>
+        <div class="gold"></div>
+        <p class="subtitle">
+            An invitation-only collection of the world's most exceptional teas and coffees.<br>
+            Sourced directly from heritage estates, prepared with meticulous precision.
+        </p>
+    </div>
 
-<h1>Rare Origins</h1>
+    <div class="light"></div>
 
-<div class="gold"></div>
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
 
-<p class="subtitle">
-An invitation-only collection of the world's most exceptional teas and coffees.
-Sourced directly from heritage estates, prepared with meticulous precision.
-</p>
+        // Maintain canvas size on window resize
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
 
-</div>
+        window.addEventListener("resize", resize);
+        resize();
 
-<div class="light"></div>
+        let mouse = { x: -1000, y: -1000 };
 
-<script>
+        document.addEventListener("mousemove", e => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
 
-const canvas = document.getElementById("canvas")
-const ctx = canvas.getContext("2d")
+        class Leaf {
+            constructor() {
+                this.init();
+            }
 
-canvas.width = window.innerWidth
-canvas.height = window.innerHeight
+            init() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
 
-let mouse = {x:0,y:0}
+                // Baby tea leaves (buds) are slender and elongated
+                this.length = 25 + Math.random() * 32;
+                this.width = this.length * (0.18 + Math.random() * 0.12);
 
-document.addEventListener("mousemove", e=>{
-mouse.x = e.clientX
-mouse.y = e.clientY
-})
+                this.rotation = Math.random() * Math.PI * 2;
+                this.spin = (Math.random() - 0.5) * 0.005;
+                this.speedX = (Math.random() - 0.5) * 0.25;
+                this.speedY = 0.12 + Math.random() * 0.3;
+                this.depth = 0.2 + Math.random() * 0.8;
+                this.opacity = 0.3 + (this.depth * 0.6);
 
-class Leaf{
+                // Organic variation for 'tender' bud aesthetics
+                this.curl = (Math.random() - 0.5) * 0.2;
 
-constructor(){
+                // High-end 'Spring Flush' tea colors
+                const variations = [
+                    { base: '#4d633c', light: '#a8c691', dark: '#1e2916' }, // First Flush Bud
+                    { base: '#3a4f2c', light: '#789c5a', dark: '#151c0f' }, // Silver Needle
+                    { base: '#5b6b44', light: '#9db87c', dark: '#252e1a' }  // Dragon Well Green
+                ];
+                const v = variations[Math.floor(Math.random() * variations.length)];
+                this.colorBase = v.base;
+                this.colorLight = v.light;
+                this.colorDark = v.dark;
+            }
 
-this.x = Math.random()*canvas.width
-this.y = Math.random()*canvas.height
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                ctx.globalAlpha = this.opacity;
 
-this.size = 20 + Math.random()*35
+                // Delicate organic shadow
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+                ctx.shadowBlur = 8 * this.depth;
+                ctx.shadowOffsetX = 4 * this.depth;
+                ctx.shadowOffsetY = 4 * this.depth;
 
-this.rotation = Math.random()*Math.PI
+                // Gradient that mimics the velvety texture of fresh tea buds
+                let gradient = ctx.createLinearGradient(0, -this.length, 0, this.length);
+                gradient.addColorStop(0, this.colorLight);
+                gradient.addColorStop(0.5, this.colorBase);
+                gradient.addColorStop(1, this.colorDark);
+                ctx.fillStyle = gradient;
 
-this.speedX = (Math.random()-0.5)*0.2
-this.speedY = (Math.random()-0.5)*0.2
+                // Elegant, slender bud-like shape
+                ctx.beginPath();
+                ctx.moveTo(0, -this.length);
 
-this.depth = 0.3 + Math.random()*0.7
+                // Right Sweep
+                ctx.bezierCurveTo(
+                    this.width * (1.1 + this.curl), -this.length * 0.4,
+                    this.width * (0.8 + this.curl), this.length * 0.5,
+                    0, this.length
+                );
 
-}
+                // Left Sweep
+                ctx.bezierCurveTo(
+                    -this.width * (0.8 - this.curl), this.length * 0.5,
+                    -this.width * (1.1 - this.curl), -this.length * 0.4,
+                    0, -this.length
+                );
 
-draw(){
+                ctx.fill();
 
-ctx.save()
+                // Detailed 'baby' leaf veins (very subtle)
+                ctx.shadowColor = 'transparent';
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+                ctx.lineWidth = 0.7 * this.depth;
 
-ctx.translate(this.x,this.y)
+                // Midrib
+                ctx.beginPath();
+                ctx.moveTo(0, -this.length + 5);
+                ctx.quadraticCurveTo(this.width * 0.3 * this.curl, 0, 0, this.length - 3);
+                ctx.stroke();
 
-ctx.rotate(this.rotation)
+                // Soft branching veins for 'better' aesthetics
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
+                for (let i = 1; i <= 3; i++) {
+                    let y = -this.length + (i * this.length * 0.5);
+                    let vW = (this.width * 0.4) * (1 - (Math.abs(y) / this.length));
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(vW, y - this.length * 0.1);
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(-vW, y - this.length * 0.1);
+                    ctx.stroke();
+                }
 
-let gradient = ctx.createLinearGradient(
--this.size,
--this.size,
-this.size,
-this.size
-)
+                ctx.restore();
+            }
 
-gradient.addColorStop(0,"#506b3d")
-gradient.addColorStop(1,"#2f3f22")
+            update() {
+                this.x += this.speedX * this.depth;
+                this.y += this.speedY * this.depth;
+                this.rotation += this.spin * this.depth;
 
-ctx.fillStyle = gradient
+                // Interaction with mouse cursor
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let dist = Math.sqrt(dx * dx + dy * dy);
 
-ctx.beginPath()
+                if (dist < 150) {
+                    let force = (150 - dist) / 150;
+                    this.x -= dx * force * 0.05;
+                    this.y -= dy * force * 0.05;
+                    this.rotation += force * 0.02;
+                }
 
-ctx.moveTo(0,-this.size)
+                // Smooth wrap-around logic
+                const buffer = this.length + 50;
+                if (this.x > canvas.width + buffer) this.x = -buffer;
+                if (this.x < -buffer) this.x = canvas.width + buffer;
+                if (this.y > canvas.height + buffer) this.y = -buffer;
+                if (this.y < -buffer) this.y = canvas.height + buffer;
+            }
+        }
 
-ctx.quadraticCurveTo(
-this.size,
-0,
-0,
-this.size
-)
+        const leaves = [];
+        const leafCount = 55; // Calibrated for elegance and visual balance
 
-ctx.quadraticCurveTo(
--this.size,
-0,
-0,
--this.size
-)
+        for (let i = 0; i < leafCount; i++) {
+            leaves.push(new Leaf());
+        }
 
-ctx.fill()
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-ctx.strokeStyle="rgba(255,255,255,0.08)"
-ctx.lineWidth=1
+            // Layering: Render further leaves first (parallax simulation)
+            leaves.sort((a, b) => a.depth - b.depth);
 
-ctx.beginPath()
+            leaves.forEach(l => {
+                l.update();
+                l.draw();
+            });
 
-ctx.moveTo(0,-this.size)
-ctx.lineTo(0,this.size)
+            requestAnimationFrame(animate);
+        }
 
-ctx.stroke()
-
-ctx.restore()
-
-}
-
-update(){
-
-this.x += this.speedX*this.depth
-this.y += this.speedY*this.depth
-
-let dx = mouse.x - this.x
-let dy = mouse.y - this.y
-
-let dist = Math.sqrt(dx*dx + dy*dy)
-
-if(dist < 120){
-
-this.x -= dx*0.02
-this.y -= dy*0.02
-
-}
-
-this.rotation += 0.002*this.depth
-
-if(this.x > canvas.width+50) this.x = -50
-if(this.x < -50) this.x = canvas.width+50
-
-if(this.y > canvas.height+50) this.y = -50
-if(this.y < -50) this.y = canvas.height+50
-
-}
-
-}
-
-const leaves = []
-
-for(let i=0;i<80;i++){
-leaves.push(new Leaf())
-}
-
-function animate(){
-
-ctx.clearRect(0,0,canvas.width,canvas.height)
-
-leaves.forEach(l=>{
-l.update()
-l.draw()
-})
-
-requestAnimationFrame(animate)
-
-}
-
-animate()
-
-</script>
-
+        animate();
+    </script>
 </body>
+
 </html>
