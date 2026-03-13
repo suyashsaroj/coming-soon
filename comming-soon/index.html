@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rare Origins</title>
+
+<style>
+
+body{
+margin:0;
+background:#070707;
+font-family: "Georgia", serif;
+color:white;
+overflow:hidden;
+}
+
+/* main content */
+
+.container{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+text-align:center;
+z-index:10;
+max-width:700px;
+}
+
+h1{
+font-size:90px;
+font-weight:500;
+letter-spacing:1px;
+margin:0;
+}
+
+.gold{
+width:70px;
+height:2px;
+background:#c6a357;
+margin:22px auto;
+}
+
+.subtitle{
+font-size:20px;
+line-height:1.7;
+opacity:.85;
+}
+
+/* canvas */
+
+canvas{
+position:absolute;
+top:0;
+left:0;
+}
+
+/* subtle lighting */
+
+.light{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:radial-gradient(circle at center,
+rgba(255,220,150,0.06),
+transparent 60%);
+pointer-events:none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div class="container">
+
+<h1>Rare Origins</h1>
+
+<div class="gold"></div>
+
+<p class="subtitle">
+An invitation-only collection of the world's most exceptional teas and coffees.
+Sourced directly from heritage estates, prepared with meticulous precision.
+</p>
+
+</div>
+
+<div class="light"></div>
+
+<script>
+
+const canvas = document.getElementById("canvas")
+const ctx = canvas.getContext("2d")
+
+canvas.width = window.innerWidth
+canvas.height = window.innerHeight
+
+let mouse = {x:0,y:0}
+
+document.addEventListener("mousemove", e=>{
+mouse.x = e.clientX
+mouse.y = e.clientY
+})
+
+class Leaf{
+
+constructor(){
+
+this.x = Math.random()*canvas.width
+this.y = Math.random()*canvas.height
+
+this.size = 20 + Math.random()*35
+
+this.rotation = Math.random()*Math.PI
+
+this.speedX = (Math.random()-0.5)*0.2
+this.speedY = (Math.random()-0.5)*0.2
+
+this.depth = 0.3 + Math.random()*0.7
+
+}
+
+draw(){
+
+ctx.save()
+
+ctx.translate(this.x,this.y)
+
+ctx.rotate(this.rotation)
+
+let gradient = ctx.createLinearGradient(
+-this.size,
+-this.size,
+this.size,
+this.size
+)
+
+gradient.addColorStop(0,"#506b3d")
+gradient.addColorStop(1,"#2f3f22")
+
+ctx.fillStyle = gradient
+
+ctx.beginPath()
+
+ctx.moveTo(0,-this.size)
+
+ctx.quadraticCurveTo(
+this.size,
+0,
+0,
+this.size
+)
+
+ctx.quadraticCurveTo(
+-this.size,
+0,
+0,
+-this.size
+)
+
+ctx.fill()
+
+ctx.strokeStyle="rgba(255,255,255,0.08)"
+ctx.lineWidth=1
+
+ctx.beginPath()
+
+ctx.moveTo(0,-this.size)
+ctx.lineTo(0,this.size)
+
+ctx.stroke()
+
+ctx.restore()
+
+}
+
+update(){
+
+this.x += this.speedX*this.depth
+this.y += this.speedY*this.depth
+
+let dx = mouse.x - this.x
+let dy = mouse.y - this.y
+
+let dist = Math.sqrt(dx*dx + dy*dy)
+
+if(dist < 120){
+
+this.x -= dx*0.02
+this.y -= dy*0.02
+
+}
+
+this.rotation += 0.002*this.depth
+
+if(this.x > canvas.width+50) this.x = -50
+if(this.x < -50) this.x = canvas.width+50
+
+if(this.y > canvas.height+50) this.y = -50
+if(this.y < -50) this.y = canvas.height+50
+
+}
+
+}
+
+const leaves = []
+
+for(let i=0;i<80;i++){
+leaves.push(new Leaf())
+}
+
+function animate(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height)
+
+leaves.forEach(l=>{
+l.update()
+l.draw()
+})
+
+requestAnimationFrame(animate)
+
+}
+
+animate()
+
+</script>
+
+</body>
+</html>
