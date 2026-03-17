@@ -162,109 +162,121 @@
     <script>
         const canvas = document.getElementById("canvas");
         const ctx = canvas.getContext("2d");
-
-        // Maintain canvas size on window resize
+        
+        // Resize canvas
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         }
-
         window.addEventListener("resize", resize);
         resize();
-
+        
+        // ----------------------
+        // 🔊 SOUND SETUP
+        // ----------------------
+        const sounds = [
+            new Audio("leaf.mp3"),
+            new Audio("leaf.mp3"),
+            new Audio("leaf.mp3")
+        ];
+        
+        // unlock audio (required by browsers)
+        document.addEventListener("click", () => {
+            sounds.forEach(s => {
+                s.play().then(() => {
+                    s.pause();
+                    s.currentTime = 0;
+                });
+            });
+        }, { once: true });
+        
+        let lastSoundTime = 0;
+        const soundCooldown = 120;
+        
+        // ----------------------
+        
         let mouse = { x: -1000, y: -1000 };
-
+        
         document.addEventListener("mousemove", e => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
         });
-
+        
         class Leaf {
             constructor() {
                 this.init();
             }
-
+        
             init() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
-
-                // Baby tea leaves (buds) are slender and elongated
+        
                 this.length = 25 + Math.random() * 32;
                 this.width = this.length * (0.18 + Math.random() * 0.12);
-
+        
                 this.rotation = Math.random() * Math.PI * 2;
                 this.spin = (Math.random() - 0.5) * 0.005;
                 this.speedX = (Math.random() - 0.5) * 0.25;
                 this.speedY = 0.12 + Math.random() * 0.3;
                 this.depth = 0.2 + Math.random() * 0.8;
                 this.opacity = 0.3 + (this.depth * 0.6);
-
-                // Organic variation for 'tender' bud aesthetics
+        
                 this.curl = (Math.random() - 0.5) * 0.2;
-
-                // High-end 'Spring Flush' tea colors
+        
                 const variations = [
-                    { base: '#4d633c', light: '#a8c691', dark: '#1e2916' }, // First Flush Bud
-                    { base: '#3a4f2c', light: '#789c5a', dark: '#151c0f' }, // Silver Needle
-                    { base: '#5b6b44', light: '#9db87c', dark: '#252e1a' }  // Dragon Well Green
+                    { base: '#4d633c', light: '#a8c691', dark: '#1e2916' },
+                    { base: '#3a4f2c', light: '#789c5a', dark: '#151c0f' },
+                    { base: '#5b6b44', light: '#9db87c', dark: '#252e1a' }
                 ];
                 const v = variations[Math.floor(Math.random() * variations.length)];
                 this.colorBase = v.base;
                 this.colorLight = v.light;
                 this.colorDark = v.dark;
             }
-
+        
             draw() {
                 ctx.save();
                 ctx.translate(this.x, this.y);
                 ctx.rotate(this.rotation);
                 ctx.globalAlpha = this.opacity;
-
-                // Delicate organic shadow
+        
                 ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
                 ctx.shadowBlur = 8 * this.depth;
                 ctx.shadowOffsetX = 4 * this.depth;
                 ctx.shadowOffsetY = 4 * this.depth;
-
-                // Gradient that mimics the velvety texture of fresh tea buds
+        
                 let gradient = ctx.createLinearGradient(0, -this.length, 0, this.length);
                 gradient.addColorStop(0, this.colorLight);
                 gradient.addColorStop(0.5, this.colorBase);
                 gradient.addColorStop(1, this.colorDark);
                 ctx.fillStyle = gradient;
-
-                // Elegant, slender bud-like shape
+        
                 ctx.beginPath();
                 ctx.moveTo(0, -this.length);
-
-                // Right Sweep
+        
                 ctx.bezierCurveTo(
                     this.width * (1.1 + this.curl), -this.length * 0.4,
                     this.width * (0.8 + this.curl), this.length * 0.5,
                     0, this.length
                 );
-
-                // Left Sweep
+        
                 ctx.bezierCurveTo(
                     -this.width * (0.8 - this.curl), this.length * 0.5,
                     -this.width * (1.1 - this.curl), -this.length * 0.4,
                     0, -this.length
                 );
-
+        
                 ctx.fill();
-
-                // Detailed 'baby' leaf veins (very subtle)
+        
                 ctx.shadowColor = 'transparent';
                 ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
                 ctx.lineWidth = 0.7 * this.depth;
-
-                // Midrib
+        
                 ctx.beginPath();
                 ctx.moveTo(0, -this.length + 5);
                 ctx.quadraticCurveTo(this.width * 0.3 * this.curl, 0, 0, this.length - 3);
                 ctx.stroke();
-
-                // Soft branching veins for 'better' aesthetics
+        
                 ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
                 for (let i = 1; i <= 3; i++) {
                     let y = -this.length + (i * this.length * 0.5);
@@ -276,28 +288,37 @@
                     ctx.lineTo(-vW, y - this.length * 0.1);
                     ctx.stroke();
                 }
-
+        
                 ctx.restore();
             }
-
+        
             update() {
                 this.x += this.speedX * this.depth;
                 this.y += this.speedY * this.depth;
                 this.rotation += this.spin * this.depth;
-
-                // Interaction with mouse cursor
+        
                 let dx = mouse.x - this.x;
                 let dy = mouse.y - this.y;
                 let dist = Math.sqrt(dx * dx + dy * dy);
-
+        
                 if (dist < 150) {
                     let force = (150 - dist) / 150;
+        
                     this.x -= dx * force * 0.05;
                     this.y -= dy * force * 0.05;
                     this.rotation += force * 0.02;
+        
+                    // 🔊 PLAY SOUND (controlled + natural)
+                    const now = Date.now();
+                    if (now - lastSoundTime > soundCooldown && force > 0.4) {
+                        const s = sounds[Math.floor(Math.random() * sounds.length)];
+                        s.volume = force * 0.2;
+                        s.currentTime = 0;
+                        s.play();
+                        lastSoundTime = now;
+                    }
                 }
-
-                // Smooth wrap-around logic
+        
                 const buffer = this.length + 50;
                 if (this.x > canvas.width + buffer) this.x = -buffer;
                 if (this.x < -buffer) this.x = canvas.width + buffer;
@@ -305,30 +326,29 @@
                 if (this.y < -buffer) this.y = canvas.height + buffer;
             }
         }
-
+        
         const leaves = [];
-        const leafCount = 55; // Calibrated for elegance and visual balance
-
+        const leafCount = 55;
+        
         for (let i = 0; i < leafCount; i++) {
             leaves.push(new Leaf());
         }
-
+        
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Layering: Render further leaves first (parallax simulation)
+        
             leaves.sort((a, b) => a.depth - b.depth);
-
+        
             leaves.forEach(l => {
                 l.update();
                 l.draw();
             });
-
+        
             requestAnimationFrame(animate);
         }
-
+        
         animate();
-    </script>
+        </script>
 </body>
 
 </html>
